@@ -169,24 +169,6 @@ const ART = {
   bigbird:  ["..............",".....sss......","....skssss....","....ssssssss..","ss..sssssss...","sss.ssssss....","wwwsssssssswww","swwwssssssswws",".sssswwwwssss.","..sssssssss...","....ssssss....",".....ssss.....","....y..y......",".............."],
   mole:     ["..........","..........","..SSSS....",".SSSSSSS..",".SkSSSSSS.",".SSSSSSSSp","..SSSSSSS.","..ww.ww...","..........",".........."],
   mound:    ["..........","..........","..........","..........","....NN....","...NnNN...","..NNNNNN..",".NNnNNNNN.","..........",".........."],
-  toby:     [
-    "........................",
-    ".....kkkkkk.............",
-    "....kkkkkkkkdd..........",
-    "...kknkkkkkkdddd........",
-    "...kkYkkkkkkkddd........",
-    "..kkkkkkkkkkkkddd.......",
-    ".Skkkkkkkkkkkkkddkkkkk..",
-    ".sskkkkkkkkkkkkkkkkkkkk.",
-    "..sskkkkkkkkkkkkkkkkkkkk",
-    "....rrrrkkkkkkkkkkkkkkkk",
-    "....kwwwwkkkkkkkkkkkkk.k",
-    "....kwwwwkkkkkkkkkkkk..k",
-    "....kwwwwkkk.....kkkk...",
-    "....kkwwkkk......kkkk...",
-    "....kk..kkk......kk.kk..",
-    "....kk...kk......kk..kk.",
-  ],
   house:  ["......rr........",".....rrrr.......","....rrrrrr......","...rrrrrrrr.....","..rrrrrrrrrr....",".rrrrrrrrrrrr...","..wwwwwwwwww....","..wwbbwwwwbb....","..wwbbwwwwbb....","..wwwwwwwwww....","..wwwwNNwwww....","..wwwwNNwwww....","..wwwwNNwwww....","..NNNNNNNNNN....","................","................"],
 };
 const sprCache = {};
@@ -197,6 +179,41 @@ function sprite(name, scale = 1) {
   const x = c.getContext('2d');
   rows.forEach((row, y) => { for (let i = 0; i < w; i++) { const col = PAL[row[i]]; if (col) { x.fillStyle = col; x.fillRect(i * scale, y * scale, scale, scale); } } });
   return sprCache[key] = c;
+}
+
+
+// Toby: dog frames from "Dog Sprites" by Shepardskin (OpenGameArt.org, CC0), recolored to Toby's coat.
+// k outline/eyes/nose, g muzzle highlight, b coat, d shade, D deep shade, p tongue; r collar and w chest are added per frame.
+const TOBY_PAL = { k:'#0B0B0E', g:'#9A9AA0', b:'#2C2C36', d:'#1A1A21', D:'#0F0F14', p:'#D66BA0', r:'#D9413A', w:'#F4F1EA' };
+const TOBY_RAW = {
+  stand: [[3, [".............k.","...ddkg......k.","..dbbkkdkkkdk..","kgbkbkkbbkbbbd.","dbbbbbbbbbbbbd.",".dbbbddbbbbbbd.","..ddd.Ddbdddbbd","......Ddbd.Ddbd","......Ddbd.Ddbd",".......dd...dd."]]],
+  bite:  [[3, [".............k.","..ddd........k.","kdbkbkgdkkkdk..","gbbbbkkbbkbbbd.",".ddbbkkbbbbbbd.","..pdbddbbbbbbd.","...dd.Ddbdddbbd","......Ddbd.Ddbd","......Ddbd.Ddbd",".......dd...dd."]]],
+  bark:  [[3, ["gkddg.......k.","kbbbkk......k.","dbkbkkdkkkdk..","ddbbbbbbkbbbd.",".dddbbbbbbbbd.","....ddbbbbbbd.",".....Ddbdddbbd",".....Ddbd.Ddbd",".....Ddbd.Ddbd","......dd...dd."]]],
+  sit:   [[3, ["..............","...ddkg.......","..dbbkkdk.....","kgbkbkkbbkk...","dbbbbbbbgbbd..",".dbbbddbbbbbkk","..ddd.Ddbbdbd.","......Ddbddbd.","......Ddbdbdd.",".......ddddd.."]],
+          [3, [".............","..kkkk.......",".kdbgkdk.....","kkbbkgbbkk...","dgkbbdbgbbd..","dbbbbdbbbbbkk",".ddddddbbdbd.",".....Ddbddbd.",".....Ddbdbdd.","......ddddd.."]]],
+  walk:  [[3, [".............k","...ddkg......k","..dbbkkdkkkdk.","kgbkbkkbbkbbbd","dbbbbbbbbbbbbd",".dbbbddbbbbbbd","..ddd.Ddbdddbd","......Ddbd.dbd",".....DDdbd.dbd",".....DD.dd.dd."]],
+          [3, ["...............","...ddkg......kk","..dbbkkdkkkdk..","kgbkbkkbbkbbbd.","dbbbbbbbbbbbbd.",".dbbbddbbbbbbd.","..ddd.dbbdddbbd",".....dbbd.DDdbd",".....ddd..DDdbd","......DD....dd."]],
+          [4, [".............k..",".............k..","...ddkg..kkdk...","..dbbkkdkkbbbd..","kgbkbkkbbbbbbd..","dbbbbbbbbbbbbbd.",".dbbbddbbdddbbd.","..ddd.dbb.DDdbbd",".....dbbd.dDDdbd",".....dddD.DD..dd"]],
+          [3, ["...............","...ddkg......kk","..dbbkkdkkkdk..","kgbkbkkbbkbbbd.","dbbbbbbbbbbbbd.",".dbbbddbbbbbbd.","..ddd.dbdddbbd.","......dbdD.dbbd","......dbdD.Ddbd","......dd...DDdd"]],
+          [3, [".............k","...ddkg......k","..dbbkkdkkkdk.","kgbkbkkbbkbbbd","dbbbbbbbbbbbbd",".dbbbdbbbbbbdd","..ddd.dbdddbbd",".....Ddbd..dbd",".....Ddbd..ddD","......dd....DD"]],
+          [4, ["...............",".............kk","...ddkg..kkdk..","..dbbkkdkkbbbd.","kgbkbkkbbbbbbd.","dbbbbbbbbbbbbd.",".dbbbdbbbddbbd.","..dddDdbd.dbdDd","....DDdbd.dbdDD","....DD.dd.dd.DD"]]],
+};
+// dress each frame: red collar behind the head, white chest below it (only over coat pixels)
+const TOBY = {};
+for (const k in TOBY_RAW) TOBY[k] = TOBY_RAW[k].map(([hr, rows]) => {
+  const g = rows.map(r => r.split(''));
+  const put = (y, x, ch) => { if (g[y] && g[y][x] === 'b') g[y][x] = ch; };
+  put(hr, 6, 'r'); put(hr, 7, 'r'); put(hr + 1, 6, 'r');
+  put(hr + 1, 7, 'w'); put(hr + 1, 8, 'w'); put(hr + 1, 9, 'w'); put(hr + 2, 7, 'w'); put(hr + 2, 8, 'w');
+  return g.map(r => r.join(''));
+});
+const tobyCache = {};
+function tobySprite(kind, i, scale) {
+  const key = kind + i + '@' + scale; if (tobyCache[key]) return tobyCache[key];
+  const rows = TOBY[kind][i], h = rows.length, w = Math.max(...rows.map(r => r.length));
+  const c = document.createElement('canvas'); c.width = w * scale; c.height = h * scale; const x = c.getContext('2d');
+  rows.forEach((row, y) => { for (let j = 0; j < row.length; j++) { const col = TOBY_PAL[row[j]]; if (col) { x.fillStyle = col; x.fillRect(j * scale, y * scale, scale, scale); } } });
+  return tobyCache[key] = c;
 }
 
 const TOWERS = {
@@ -459,10 +476,10 @@ function step(dt) {
     } }
   // Toby
   { const t = G.toby, dx = t.tx - t.x, dy = t.ty - t.y, dd = Math.hypot(dx, dy), sp = 3.2 * dt;
-    if (dd > .05) { const m = Math.min(dd, sp); t.x += dx / dd * m; t.y += dy / dd * m; if (Math.abs(dx) > .05) t.face = dx < 0 ? -1 : 1; t.moving = true; } else t.moving = false;
+    if (dd > .05) { const m = Math.min(dd, sp); t.x += dx / dd * m; t.y += dy / dd * m; if (Math.abs(dx) > .05) t.face = dx < 0 ? -1 : 1; t.moving = true; t.idle = 0; } else { t.moving = false; t.idle = (t.idle || 0) + dt; }
     t.cd -= dt; t.bark = Math.max(0, t.bark - dt); t.bite = Math.max(0, t.bite - dt); t.barkRing = Math.max(0, t.barkRing - dt);
     if (t.cd <= 0) { let best = null, bd = -1; for (const e of G.enemies) { if (e.dead || (e.def.air && dist(t.x, t.y, e.x, e.y) > .7)) continue; const d = dist(t.x, t.y, e.x, e.y); if (d <= 1.25 && e.d > bd) { bd = e.d; best = e; } }
-      if (best) { t.cd = .7; t.bite = .15; t.face = best.x < t.x ? -1 : 1; damage(best, 22 + 5 * G.wave); sfx('tongue'); } }
+      if (best) { t.cd = .7; t.bite = .15; t.idle = 0; t.face = best.x < t.x ? -1 : 1; damage(best, 22 + 5 * G.wave); sfx('tongue'); } }
     if (G.barkT > 0) { G.barkT -= dt; for (const e of G.enemies) if (!e.dead && dist(t.x, t.y, e.x, e.y) <= 3.2) e.slow = Math.max(e.slow, .7); } }
   // shots
   for (const s of G.shots) {
@@ -504,11 +521,15 @@ function draw() {
   if (G.shopSel && G.hover && buildable(G.hover.x, G.hover.y)) { ctx.globalAlpha = .55; ctx.drawImage(sprite(G.shopSel, 2), G.hover.x * T, G.hover.y * T); ctx.globalAlpha = 1; }
   if (G.sel) { ctx.strokeStyle = '#F2B233'; ctx.lineWidth = 2; ctx.strokeRect(G.sel.x * T + 1, G.sel.y * T + 1, T - 2, T - 2); }
   // Toby
-  { const t = G.toby, sp = sprite('toby', 2), x = Math.round(t.x * T), y = Math.round(t.y * T);
+  { const t = G.toby, x = Math.round(t.x * T), y = Math.round(t.y * T);
     if (t.barkRing > 0) { ctx.beginPath(); ctx.arc(x, y, (1 - t.barkRing / .5) * 3.2 * T, 0, 6.283); ctx.strokeStyle = '#F4F1EA'; ctx.globalAlpha = t.barkRing / .5; ctx.lineWidth = 3; ctx.stroke(); ctx.globalAlpha = 1; }
-    ctx.fillStyle = '#00000044'; ctx.beginPath(); ctx.ellipse(x, y + 15, 20, 4, 0, 0, 6.283); ctx.fill();
-    const hop = t.moving ? Math.abs(Math.sin(G.time * 14)) * 3 : 0, lunge = t.bite > 0 ? 3 * t.face : 0;
-    ctx.save(); ctx.translate(x + lunge, y - hop); ctx.scale(t.face, 1); ctx.drawImage(sp, -24, -16); ctx.restore();
+    ctx.fillStyle = '#00000044'; ctx.beginPath(); ctx.ellipse(x, y + 12, 20, 5, 0, 0, 6.283); ctx.fill();
+    let kind = 'stand', fi = 0;
+    if (t.bite > 0) kind = 'bite'; else if (t.barkRing > 0 || (G.barkT || 0) > 1.8) kind = 'bark';
+    else if (t.moving) { kind = 'walk'; fi = Math.floor(G.time * 12) % 6; }
+    else if (t.idle > 1.5) { kind = 'sit'; fi = Math.floor(G.time / 2.5) % 2; }
+    const sp = tobySprite(kind, fi, 3), lunge = t.bite > 0 ? 4 * t.face : 0;
+    ctx.save(); ctx.translate(x + lunge, y); ctx.scale(t.face, 1); ctx.drawImage(sp, -7 * 3, 12 - sp.height); ctx.restore();
     if (dist(t.x, t.y, t.tx, t.ty) > .1) { ctx.strokeStyle = '#F4F1EA66'; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(t.tx * T, t.ty * T); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#F2B233'; ctx.fillRect(t.tx * T - 2, t.ty * T - 2, 4, 4); } }
   // enemies: ground first, then air
   const en = G.enemies.slice().sort((a, b) => (a.def.air - b.def.air) || (a.y - b.y));
@@ -562,7 +583,7 @@ function renderMenu() {
     el.appendChild(b); });
   $('progress').textContent = `${total} / ${MAPS.length * 3} stars`;
   const lg = $('legend'); lg.innerHTML = '';
-  const add = (spr, name, text) => { const d = document.createElement('div'); d.appendChild(sprite(spr, 2)); d.insertAdjacentHTML('beforeend', `<span><b>${name}</b> · ${text}</span>`); lg.appendChild(d); };
+  const add = (spr, name, text) => { const d = document.createElement('div'); d.appendChild(spr === 'toby' ? tobySprite('stand', 0, 2) : sprite(spr, 2)); d.insertAdjacentHTML('beforeend', `<span><b>${name}</b> · ${text}</span>`); lg.appendChild(d); };
   add('toby', 'Toby', 'Bites what he reaches. Bark (B) slows and shoves everything near him, once every 18 seconds.');
   for (const k of Object.keys(ENEMIES)) add(k, ENEMIES[k].name, ENEMIES[k].blurb);
   for (const k of TOWER_ORDER) add(k, TOWERS[k].name, TOWERS[k].blurb);
@@ -668,7 +689,7 @@ function frame(now) {
 }
 renderMenu();
 requestAnimationFrame(frame);
-window.BS = { step, draw, ui, startMap, bark, state: () => G, tower: (t, x, y) => { G.towers.push({ type: t, def: TOWERS[t], x, y, level: 0, cd: 0, anim: 0 }); }, wave: startWave };
+window.BS = { step, draw, ui, startMap, bark, tobySprite, state: () => G, tower: (t, x, y) => { G.towers.push({ type: t, def: TOWERS[t], x, y, level: 0, cd: 0, anim: 0 }); }, wave: startWave };
 })();
 </script>
 </body>

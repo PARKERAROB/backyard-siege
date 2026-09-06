@@ -90,7 +90,7 @@
   .help{color:var(--muted);font-size:13px;line-height:1.5}
   .help b{color:var(--ink)}
   .legend{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:12px;color:var(--muted)}
-  .legend div{display:flex;align-items:center;gap:6px} .legend canvas{width:20px;height:20px;image-rendering:pixelated;flex:none}
+  .legend div{display:flex;align-items:center;gap:6px} .legend canvas{width:auto;height:22px;image-rendering:pixelated;flex:none}
   .legend b{color:var(--ink);font-weight:400}
   @media (max-width:480px){ .hud{padding:6px 8px} .stat{font-size:11px;padding:0 3px} button{padding:0 9px} }
 </style>
@@ -151,7 +151,7 @@
 // DATA: palette, sprites, towers, enemies, maps, waves
 // =====================================================================
 const PAL = { k:'#1B1B22', w:'#F4F1EA', g:'#6BAF4A', G:'#3E7A2E', y:'#F2C94C', Y:'#C98A12', r:'#D9413A', b:'#4A8FD6', B:'#2C5E9E',
-              n:'#B08A5A', N:'#7A5A32', s:'#9A9AA0', S:'#5A5A62', p:'#D66BA0', o:'#F08A2E', l:'#A5D6F0', e:'#E8B892', v:'#8A63C9', m:'#6E3E9A' };
+              n:'#B08A5A', N:'#7A5A32', s:'#9A9AA0', S:'#5A5A62', p:'#D66BA0', o:'#F08A2E', l:'#A5D6F0', e:'#E8B892', v:'#8A63C9', m:'#6E3E9A', d:'#34343E' };
 const ART = {
   sprinkler: ["................","................",".......ll.......","......lbbl......",".....lbssbl.....","......ssss......",".......ss.......",".......ss.......",".......ss.......","......SssS......",".....SSSSSS.....","....SNNNNNNS....","....NNNNNNNN....",".....NNNNNN.....","................","................"],
   beehive:   ["................",".......NN.......","......NNNN......",".....yyyyyy.....","....yYYYYYYy....","....yyyyyyyy....","...yYYYYYYYYy...","...yyyyyyyyyy...","...yYYYYYYYYy...","....yyykkyyy....","....YYYkkYYY....",".....yyyyyy.....","......YYYY......","................","................","................"],
@@ -169,7 +169,24 @@ const ART = {
   bigbird:  ["..............",".....sss......","....skssss....","....ssssssss..","ss..sssssss...","sss.ssssss....","wwwsssssssswww","swwwssssssswws",".sssswwwwssss.","..sssssssss...","....ssssss....",".....ssss.....","....y..y......",".............."],
   mole:     ["..........","..........","..SSSS....",".SSSSSSS..",".SkSSSSSS.",".SSSSSSSSp","..SSSSSSS.","..ww.ww...","..........",".........."],
   mound:    ["..........","..........","..........","..........","....NN....","...NnNN...","..NNNNNN..",".NNnNNNNN.","..........",".........."],
-  toby:     ["................","....kk..kkkk....","...kkkkkkkkk....","..kkkkkkkkkkk...","..kknkkkknkkk...","..kkYkkkkYkkkk..","..Skkkkkkkkkkkk.","...kkkkkkkkkkkk.","...kkkkkkkkkkkkk","....rrrrrrkkkkk.","....kwwwwkkkkkk.","....kwwwwkkkkkk.","....kwwwkkkkkk..","....kk.kk.kk.kk.","....kk.kk.kk.kk.","................"],
+  toby:     [
+    "........................",
+    ".....kkkkkk.............",
+    "....kkkkkkkkdd..........",
+    "...kknkkkkkkdddd........",
+    "...kkYkkkkkkkddd........",
+    "..kkkkkkkkkkkkddd.......",
+    ".Skkkkkkkkkkkkkddkkkkk..",
+    ".sskkkkkkkkkkkkkkkkkkkk.",
+    "..sskkkkkkkkkkkkkkkkkkkk",
+    "....rrrrkkkkkkkkkkkkkkkk",
+    "....kwwwwkkkkkkkkkkkkk.k",
+    "....kwwwwkkkkkkkkkkkk..k",
+    "....kwwwwkkk.....kkkk...",
+    "....kkwwkkk......kkkk...",
+    "....kk..kkk......kk.kk..",
+    "....kk...kk......kk..kk.",
+  ],
   house:  ["......rr........",".....rrrr.......","....rrrrrr......","...rrrrrrrr.....","..rrrrrrrrrr....",".rrrrrrrrrrrr...","..wwwwwwwwww....","..wwbbwwwwbb....","..wwbbwwwwbb....","..wwwwwwwwww....","..wwwwNNwwww....","..wwwwNNwwww....","..wwwwNNwwww....","..NNNNNNNNNN....","................","................"],
 };
 const sprCache = {};
@@ -489,9 +506,9 @@ function draw() {
   // Toby
   { const t = G.toby, sp = sprite('toby', 2), x = Math.round(t.x * T), y = Math.round(t.y * T);
     if (t.barkRing > 0) { ctx.beginPath(); ctx.arc(x, y, (1 - t.barkRing / .5) * 3.2 * T, 0, 6.283); ctx.strokeStyle = '#F4F1EA'; ctx.globalAlpha = t.barkRing / .5; ctx.lineWidth = 3; ctx.stroke(); ctx.globalAlpha = 1; }
-    ctx.fillStyle = '#00000044'; ctx.beginPath(); ctx.ellipse(x, y + 13, 13, 4, 0, 0, 6.283); ctx.fill();
+    ctx.fillStyle = '#00000044'; ctx.beginPath(); ctx.ellipse(x, y + 15, 20, 4, 0, 0, 6.283); ctx.fill();
     const hop = t.moving ? Math.abs(Math.sin(G.time * 14)) * 3 : 0, lunge = t.bite > 0 ? 3 * t.face : 0;
-    ctx.save(); ctx.translate(x + lunge, y - hop); ctx.scale(t.face, 1); ctx.drawImage(sp, -16, -16); ctx.restore();
+    ctx.save(); ctx.translate(x + lunge, y - hop); ctx.scale(t.face, 1); ctx.drawImage(sp, -24, -16); ctx.restore();
     if (dist(t.x, t.y, t.tx, t.ty) > .1) { ctx.strokeStyle = '#F4F1EA66'; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(t.tx * T, t.ty * T); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#F2B233'; ctx.fillRect(t.tx * T - 2, t.ty * T - 2, 4, 4); } }
   // enemies: ground first, then air
   const en = G.enemies.slice().sort((a, b) => (a.def.air - b.def.air) || (a.y - b.y));
